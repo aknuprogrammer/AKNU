@@ -1,0 +1,2 @@
+GET http://localhost:4567/api/faculty-tracking/tracking-data?page=1&limite=10
+Content-Type: application/json

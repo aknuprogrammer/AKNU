@@ -1,0 +1,426 @@
+body, html, #root, .App {
+  overflow-x: hidden !important;
+}
+
+.cac-img-wrapper-full {
+  width: 100vw;
+  max-width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  border-radius: 0;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+.cac-img-full {
+  width: 100vw;
+  height: 340px;
+  object-fit: cover;
+  display: block;
+}
+.cac-img-overlay {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 30%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  flex-direction: column;
+  background: none;
+  pointer-events: none;
+}
+.cac-quote-blur {
+  width: 100%;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(8px);
+  padding: 1.5rem 2rem 1.5rem 2rem;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.cac-quote {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.7);
+  margin: 0 2rem;
+  line-height: 1.3;
+  font-family: 'Georgia', serif;
+}
+.cac-quote-author {
+  display: block;
+  margin-top: 10px;
+  color: #fff;
+  font-size: 1.1rem;
+  text-align: right;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+@media (max-width: 900px) {
+  .cac-img-full {
+    height: 180px;
+  }
+  .cac-quote {
+    font-size: 1.1rem;
+  }
+  .cac-quote-blur {
+    padding: 0.7rem 1rem 0.7rem 1rem;
+  }
+}
+.cac-about-section {
+  width: 100vw;
+  max-width: 100vw;
+  margin: 2.5rem 0 2rem 0;
+  background: #fff;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 2rem 3vw;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: none;
+}
+.cac-dept-dropdowns-section {
+  width: 100vw;
+  max-width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 2.5rem;
+  padding: 0;
+}
+.cac-dept-dropdown-card {
+
+  width: 95vw;
+  max-width: 95vw;
+  background: #007367;
+  border-radius: 0;
+  box-shadow: 0 2px 8px rgba(31,38,135,0.08);
+  transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+  margin: 2vh auto;
+  padding: 0;
+  overflow-x: auto;
+}
+.cac-dept-dropdown-card.open {
+  background: #fff;
+  border-radius: 0;
+}
+.cac-dept-dropdown-btn {
+  width: 100%;
+  background: #007367;
+  color: #fff;
+  font-size: 1.08rem;
+  font-family: 'Georgia', serif;
+  border: none;
+  border-radius: 0;
+  padding: 1.1rem 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  outline: none;
+  transition: background 0.2s, color 0.2s;
+  overflow: hidden;
+}
+.cac-dept-dropdown-card.open .cac-dept-dropdown-btn,
+.cac-dept-dropdown-btn:hover,
+.cac-dept-dropdown-btn:focus {
+  background: #fff;
+  color: #007367;
+}
+.cac-arrow {
+  margin-left: 1rem;
+  border: solid #222;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 5px;
+  transform: rotate(45deg);
+  transition: transform 0.3s;
+}
+.cac-arrow.open {
+  transform: rotate(-135deg);
+}
+.cac-dept-dropdown-content {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border-top: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background: none;
+  border-radius: 0;
+  box-shadow: 0 2px 8px rgba(31,38,135,0.10);
+  overflow-x: auto;
+  animation: dropdownFadeIn 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.cac-dept-dropdown-profile {
+  background: #007367;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 240px;
+  min-width: 180px;
+  max-width: 300px;
+  padding: 2rem 1.2rem 2rem 1.2rem;
+  gap: 1.2rem;
+}
+.cac-dept-dropdown-img {
+  width: 110px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #fff;
+  border: 4px solid #fff;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+.cac-hod-img-name {
+  color: #fff;
+  font-weight: bold;
+}
+.cac-hod-img-details {
+  color: #fff;
+  font-weight: normal;
+}
+.cac-dept-dropdown-info {
+  flex: 1;
+  background: #fff;
+  border-radius: 0 0 12px 0;
+  padding: 2rem 2rem 2rem 2rem;
+  margin-left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-height: 90px;
+  justify-content: flex-start;
+  color: #222;
+  font-size: 0.97rem;
+}
+.cac-dept-about-title {
+  font-size: 1.08rem;
+  font-weight: 700;
+  margin-bottom: 0.7rem;
+  letter-spacing: 1px;
+  color: #007367;
+}
+.cac-dept-about-section {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1.2rem;
+  text-align: justify;
+  color: #374151;
+}
+.cac-dept-about-vision, .cac-dept-about-mission {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  margin-top: 0.7rem;
+  letter-spacing: 0.5px;
+  color: #007367;
+}
+.cac-dept-about-list {
+  color: #374151;
+  font-size: 0.95rem;
+  margin: 0 0 0 1.2rem;
+  padding: 0;
+  list-style: disc inside;
+}
+.cac-about-section {
+  width: 100vw;
+  max-width: 100vw;
+  margin: 2.5rem 0 2rem 0;
+  background: #fff;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 2rem 3vw;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: none;
+}
+.cac-about-heading {
+  font-size: 1.7rem;
+  font-family: 'Georgia', serif;
+  color: #2d3748;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.cac-about-text {
+  font-size: 1.08rem;
+  color: #374151;
+  line-height: 1.7;
+  font-family: 'Georgia', serif;
+  margin: 0;
+  text-align: justify;
+}
+.cac-dept-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 1.5rem;
+}
+.cac-dept-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(31,38,135,0.06);
+  font-size: 0.97rem;
+  margin: 0 auto;
+}
+.cac-dept-table th, .cac-dept-table td {
+  padding: 0.7rem 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+.cac-dept-table th {
+  background: #f3f4f6;
+  color: #007367;
+  font-weight: 600;
+  font-size: 1rem;
+}
+.cac-dept-table td {
+  color: #374151;
+  vertical-align: middle;
+}
+.cac-dept-table-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+  background: #f8fafc;
+}
+.cac-dept-profile-link {
+  color: #007367;
+  text-decoration: underline;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.cac-dept-profile-link:hover {
+  color: #374151;
+}
+.cac-dept-qualification-title {
+  margin-top: 12px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+}
+.cac-dept-qualification-section {
+  color: #333;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+/* New styles for inner dropdowns */
+.cac-inner-dropdown {
+  width: 100%;
+  margin: 0.7rem 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 0;
+  background: #f9f9f9;
+}
+.cac-inner-dropdown-btn {
+  width: 100%;
+  background: #f3f4f6;
+  color: #007367;
+  font-size: 1rem;
+  font-family: 'Georgia', serif;
+  border: none;
+  border-radius: 0;
+  padding: 0.9rem 1.2rem;
+  cursor: pointer;
+  text-align: left;
+  font-weight: 600;
+  outline: none;
+  transition: background 0.2s, color 0.2s;
+}
+.cac-inner-dropdown-content {
+  width: 100%;
+  background: #fff;
+  padding: 1.1rem 1.2rem;
+  border-top: 1px solid #e5e7eb;
+  font-size: 0.97rem;
+  color: #374151;
+}
+@media (max-width: 900px) {
+  .cac-img-full {
+    height: 180px;
+  }
+  .cac-quote {
+    font-size: 1.1rem;
+  }
+  .cac-quote-blur {
+    padding: 0.7rem 1rem 0.7rem 1rem;
+  }
+  .cac-about-section {
+    padding: 1rem 2vw;
+    max-width: 100vw;
+  }
+  .cac-dept-dropdowns-section {
+    padding: 0;
+  }
+  .cac-dept-dropdown-card {
+    width: 99vw;
+    max-width: 99vw;
+    margin: 1vh auto;
+    padding: 0;
+  }
+  .cac-about-heading {
+    font-size: 1.1rem;
+  }
+  .cac-about-text {
+    font-size: 0.97rem;
+  }
+  .cac-dept-dropdown-content {
+    flex-direction: column;
+    overflow-x: auto;
+  }
+  .cac-dept-dropdown-profile, .cac-dept-dropdown-info {
+    width: 100% !important;
+    min-width: unset;
+    max-width: unset;
+    padding: 1.2rem 1rem 0.5rem 1rem;
+    border-radius: 0;
+  }
+  .cac-dept-dropdown-info {
+    padding: 1.2rem 1rem 1.2rem 1rem;
+    border-radius: 0 0 12px 12px;
+  }
+  .cac-dept-dropdown-card {
+    max-width: 100%;
+  }
+  .cac-dept-dropdown-info {
+    font-size: 0.93rem;
+  }
+  .cac-dept-about-title {
+    font-size: 1rem;
+  }
+  .cac-dept-about-section, .cac-dept-about-list {
+    font-size: 0.91rem;
+  }
+  .cac-dept-about-vision, .cac-dept-about-mission {
+    font-size: 0.97rem;
+  }
+  .cac-dept-table th, .cac-dept-table td {
+    padding: 0.5rem 0.4rem;
+    font-size: 0.93rem;
+  }
+  .cac-dept-table-img {
+    width: 28px;
+    height: 28px;
+  }
+  .cac-inner-dropdown-content {
+    padding: 0.7rem 0.5rem;
+  }
+}

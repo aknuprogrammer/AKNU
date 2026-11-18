@@ -1,0 +1,200 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+public/video
+src/assets/RnD/Board of Research/Research_Admission_Guidelines.pdf
+src/assets/Annual Reports
+src/assets/Academic Affairs
+src/assets/Affiliated Colleges
+src/assest/Finance Officer
+
+src/assets/Facilities/doa/
+src/assets/iqac/*.pdf
+src/assets/iqac/*.jpg
+
+# Department Programs Offered PDFs
+# Programs offered / Program offered (all variations)
+src/assets/**/Programs offered/
+src/assets/**/Program offered/
+src/assets/**/Programs Offered/
+src/assets/**/Program Offered/
+src/assets/**/programs offered/
+src/assets/**/program offered/
+
+# Arts & Science Department - All PDFs
+src/assets/arts-department/**/*.pdf
+src/assets/Affiliated Colleges/**/*.pdf
+src/assets/Code Volume/**/*.pdf
+src/assets/Facilities/**/*.pdf
+src/assets/Fee Structures
+
+src/assets/Finance Officer/*.pdf
+*.pdf
+src/assets/arts-department/cms/Commers and Managment/
+src/assets/arts-department/economics/Economics/
+src/assets/arts-department/english/English/
+src/assets/arts-department/political science/Political science/
+src/assets/arts-department/social work/Social Work/
+src/assets/arts-department/telugu/Telugu/
+src/assets/nss/Nss Form Links
+src/assets/nss/Nss Guidelines
+src/assets/nss/*.pdf
+src/assets/Rnd
+src/assets/pdfs
+src/assets/policies
+src/assets/QuickLinks
+
+# Programs offered folders
+src/assets/arts-department/**/Programs offered/
+src/assets/arts-department/**/Program offered/
+src/assets/arts-department/**/Programs Offered/
+src/assets/arts-department/**/Program Offered/
+
+# ST Department - All PDFs
+src/assets/st-department/**/*.pdf
+# Specific folders
+src/assets/st-department/aquaculture/aquaculture/
+src/assets/st-department/biochemsirty/Biochemistry/
+src/assets/st-department/biotechnology/Biotechnology/
+src/assets/st-department/botany/Botany/
+src/assets/st-department/chemistry/Chemistry/
+src/assets/st-department/geo sciences/Geo-science/
+src/assets/st-department/mathematics/Mathematics/
+src/assets/st-department/physics/Physics/
+src/assets/st-department/psychology/Psychology/
+src/assets/st-department/zoology/Zoology/
+# Programs offered folders
+src/assets/st-department/**/Programs offered/
+src/assets/st-department/**/Program offered/
+src/assets/st-department/**/Programs Offered/
+src/assets/st-department/**/Program Offered/
+
+# Engineering Department - All PDFs
+src/assets/engineering/**/*.pdf
+# Programs offered folders
+src/assets/engineering/*/Programs offered/
+src/assets/engineering/*/Program offered/
+src/assets/engineering/*/Programs Offered/
+src/assets/engineering/*/Program Offered/
+src/assets/engineering/**/Programs offered/
+src/assets/engineering/**/Program offered/
+
+# Education Department
+src/assets/edu-department/*/Programs offered/
+src/assets/edu-department/*/Program offered/
+src/assets/edu-department/**/Programs offered/
+src/assets/edu-department/**/Program offered/
+
+# Pharmacy Department
+src/assets/pharmacy/Programs offered/
+src/assets/pharmacy/Program offered/
+src/assets/pharmacy/Programs Offered/
+src/assets/pharmacy/Program Offered/
+src/assets/APK
+
+# Department Activities PDFs (all variations)
+# Department activities / Departement activites / Department cctivities
+src/assets/**/Department activites/
+src/assets/**/Department activities/
+src/assets/**/Departement activites/
+src/assets/**/Department cctivities/
+src/assets/**/Department Activities/
+src/assets/**/Department ACTIVITIES/
+src/assets/**/department activites/
+src/assets/**/department activities/
+
+# Engineering Department Activities
+src/assets/engineering/*/Department activites/
+src/assets/engineering/*/Department activities/
+src/assets/engineering/*/Departement activites/
+src/assets/engineering/*/Department cctivities/
+src/assets/engineering/**/Department activites/
+src/assets/engineering/**/Department activities/
+src/assets/engineering/**/Departement activites/
+src/assets/engineering/**/Department cctivities/
+
+# Arts & Science Department Activities
+src/assets/arts-department/**/Department activites/
+src/assets/arts-department/**/Department activities/
+src/assets/arts-department/**/Departement activites/
+src/assets/arts-department/**/Department cctivities/
+
+# ST Department Activities
+src/assets/st-department/**/Department activites/
+src/assets/st-department/**/Department activities/
+src/assets/st-department/**/Departement activites/
+src/assets/st-department/**/Department cctivities/
+
+# Education Department Activities
+src/assets/edu-department/**/Department activites/
+src/assets/edu-department/**/Department activities/
+src/assets/edu-department/**/Departement activites/
+src/assets/edu-department/**/Department cctivities/
+
+# Pharmacy Department Activities
+src/assets/pharmacy/**/Department activites/
+src/assets/pharmacy/**/Department activities/
+src/assets/pharmacy/**/Departement activites/
+src/assets/pharmacy/**/Department cctivities/
+
+# Placements PDFs (all departments)
+src/assets/**/Placements/
+src/assets/**/Placement/
+src/assets/**/placements/
+src/assets/**/placement/
+src/assets/**/Placements PDFs/
+
+# Engineering Department Placements
+src/assets/engineering/*/Placements/
+src/assets/engineering/*/Placement/
+src/assets/engineering/**/Placements/
+src/assets/engineering/**/Placement/
+
+# Arts & Science Department Placements
+src/assets/arts-department/**/Placements/
+src/assets/arts-department/**/Placement/
+
+# ST Department Placements
+src/assets/st-department/**/Placements/
+src/assets/st-department/**/Placement/
+
+# Education Department Placements
+src/assets/edu-department/**/Placements/
+src/assets/edu-department/**/Placement/
+
+# Pharmacy Department Placements
+src/assets/pharmacy/**/Placements/
+src/assets/pharmacy/**/Placement/
+
+# Sports Board PDFs (all case variations)
+src/assets/Sports Board/
+src/assets/sports board/
+src/assets/Sports board/
+src/assets/SPORTS BOARD/
+node_modules
+dist
+.env
+dist-ssr
+*.local
+public/certificatepdf
+# Editor directories and files
+.vscode/*
+# !.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+dist.zip
+.gitGraph
+
+
+/**/**/.pdf

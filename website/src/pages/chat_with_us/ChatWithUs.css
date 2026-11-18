@@ -1,0 +1,91 @@
+.myOfficeMessageForm {
+    flex-direction: column;
+    padding: 10px 30px 100px 20px;
+    display: flex;
+    gap: 25px;
+    font-size: 16px;
+}
+
+.myOfficeMessageForm a {
+    text-decoration: underline;
+    color: teal;
+}
+
+.myOfficeMessageForm fieldset > label {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    user-select: none;
+    overflow: hidden;
+    font-size: 15px;
+    max-width: 100%;
+}
+
+.myOfficeMessageForm input:focus {
+    outline: 1px solid cyan ;
+}
+
+.myOfficeMessageForm input,
+.myOfficeMessageForm select {
+    border: 1px solid #0002;
+    padding: 5px;
+    width: 100%;
+    border-radius: 5px;
+}
+
+.myOfficeMessageForm input[type="checkbox"] {
+    scale: 1.3;
+}
+
+.myOfficeMessageForm fieldset {
+    flex-direction: column;
+    align-items: start;
+    display: flex;
+    gap: 1px;
+    width: 100%;
+}
+
+.myOfficeMessageForm label,
+.myOfficeMessageForm input[type="radio"],
+.myOfficeMessageForm input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.myOfficeMessageForm fieldset:has(input[type="checkbox"]),
+.myOfficeMessageForm fieldset:has(input[type="radio"]) {
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: row;
+    display: flex;
+    gap: 10px;
+}
+
+.myOfficeMessageForm fieldset:has(input[type="checkbox"]) > input,
+.myOfficeMessageForm fieldset:has(input[type="radio"]) > input {
+    flex: 0;
+}
+
+.myOfficeMessageForm section {
+    display: flex;
+    gap: 20px
+}
+
+.myOfficeMessageForm section > * {
+    flex: 1;
+}
+
+.myOfficeMessageForm fieldset:has(*:required) > label::before {
+    content: "*";
+    color: red;
+    padding: 5px;
+}
+
+@media only screen and (max-width: 800px) {
+    .myOfficeMessageForm section {
+        flex-direction: column;
+        gap: 30px;
+    }
+    .myOfficeMessageForm {
+        gap: 30px;
+    }
+    
+}

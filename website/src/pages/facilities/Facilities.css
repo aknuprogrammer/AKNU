@@ -1,0 +1,38 @@
+.facility_library_vm {
+    display: flex;
+    gap: 30px;
+}
+
+.facility_library_vm > div {
+    flex-direction: column;
+    align-items: center;
+    display: flex;
+    flex: 1;
+}
+
+.facility_library_vm > div > img {
+    --vm-img-len: 250px;
+    width: var(--vm-img-len);
+    height: var(--vm-img-len);
+}
+
+.facility_library_vm > div > h1 {
+    font-size: 30px;
+}
+
+.facility_library_vm > div > p {
+    padding: 20px;
+    text-align: center;
+    width: 75%;
+}
+
+@media screen and (max-width: 1000px) {
+    .facility_library_vm {
+        flex-direction: column;
+    }
+    .facility_library_vm > div > p {
+        padding: 0;
+        width: 90%;
+    }
+    
+}

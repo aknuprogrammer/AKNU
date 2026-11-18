@@ -1,0 +1,12 @@
+cycles_dump.json
+debug.log
+diagnostic_output.txt
+test_login_output.txt
+api/uploads/*
+api/uploads/alumni/*.json
+node_modules/*
+.git/*
+.vscode/*
+.cursor/*
+tmp/*
+uploads/*

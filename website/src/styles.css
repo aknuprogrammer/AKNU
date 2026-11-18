@@ -1,0 +1,79 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
+}
+
+#root {
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
+}
+
+/* Standardized Container Class - Use this for consistent padding/margin across the website */
+.container-standard {
+  max-width: 1152px; /* max-w-6xl equivalent */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem; /* 16px - px-4 */
+  padding-right: 1rem; /* 16px - px-4 */
+}
+
+@media (min-width: 640px) {
+  .container-standard {
+    padding-left: 1.5rem; /* 24px - sm:px-6 */
+    padding-right: 1.5rem; /* 24px - sm:px-6 */
+  }
+}
+
+@media (min-width: 768px) {
+  .container-standard {
+    padding-left: 2rem; /* 32px - md:px-8 */
+    padding-right: 2rem; /* 32px - md:px-8 */
+  }
+}
+
+/* Wider container variant for components like Footer */
+.container-wide {
+  max-width: 1280px; /* max-w-7xl equivalent */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem; /* 16px - px-4 */
+  padding-right: 1rem; /* 16px - px-4 */
+}
+
+@media (min-width: 640px) {
+  .container-wide {
+    padding-left: 1.5rem; /* 24px - sm:px-6 */
+    padding-right: 1.5rem; /* 24px - sm:px-6 */
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-wide {
+    padding-left: 2rem; /* 32px - lg:px-8 */
+    padding-right: 2rem; /* 32px - lg:px-8 */
+  }
+}
+
+.teal-css-gradient {
+  background: #00786f;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 120, 111, 1) 0%,
+    rgba(87, 199, 133, 1) 50%,
+    rgba(255, 244, 148, 1) 100%
+  );
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
