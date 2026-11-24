@@ -97,6 +97,40 @@ const isEmptyRow = (baseData) => {
   );
 };
 
+// ✅ Helper to resolve overall grade from direct Grade or multi-component columns (theory_pass, sessional_pass, practical_pass)
+const resolveGrade = (getterFn) => {
+  // 1. Direct grade column if present
+  const directGrade = getterFn(
+    "Grade",
+    "grade",
+    "Grade Obtained",
+    "grade obtained",
+    "grade Obtained",
+    "grade_obtained",
+    "grade-obtained"
+  );
+  if (directGrade != null && directGrade !== "") return directGrade.toString().trim();
+
+  // 2. Component pass/fail columns (theory_pass, sessional_pass, practical_pass)
+  const theory = (getterFn("theory_pass", "theory pass", "theorypass", "theory_status") || "").toString().trim();
+  const sessional = (getterFn("sessional_pass", "sessional pass", "sessionalpass", "sessional_status") || "").toString().trim();
+  const practical = (getterFn("practical_pass", "practical pass", "practicalpass", "practical_status") || "").toString().trim();
+
+  const components = [theory, sessional, practical].filter(Boolean);
+  if (components.length > 0) {
+    if (components.some((c) => /^(fail|f)$/i.test(c))) return "Fail";
+    if (components.some((c) => /^(absent|ab)$/i.test(c))) return "Absent";
+    if (components.every((c) => /^(pass|p)$/i.test(c))) return "Pass";
+    return components[0];
+  }
+
+  // 3. Fallback to generic status / result / remarks column
+  const generalStatus = getterFn("result", "status", "pass_fail", "passfail", "remarks");
+  if (generalStatus != null && generalStatus !== "") return generalStatus.toString().trim();
+
+  return null;
+};
+
 const ROMAN_SEMESTER_MAP = {
   I: 1,
   II: 2,
@@ -263,8 +297,8 @@ resultRouter.post(
         return res.status(400).json({ error: "CSV file is empty or has no data rows" });
       }
 
-      // Normalise header keys to lowercase-no-spaces for matching
-      const normaliseKey = (k) => k?.toLowerCase().replace(/\s+/g, "");
+      // Normalise header keys to lowercase-no-punctuation for matching
+      const normaliseKey = (k) => k?.toLowerCase().replace(/[\s_-]+/g, "");
 
       const getVal = (row, ...keys) => {
         for (const key of keys) {
@@ -278,7 +312,7 @@ resultRouter.post(
       // Detect semester from first few data rows or fallback to ResultTitle
       let rawSem = null;
       for (const row of csvRows.slice(0, 10)) {
-        rawSem = getVal(row, "Semester", "semester", "sem", "Sem");
+        rawSem = getVal(row, "Semester", "semester", "sem", "Sem", "year", "Year", "yr");
         if (rawSem) break;
       }
       const detectedSemester = parseSemester(rawSem, ResultTitle);
@@ -298,14 +332,31 @@ resultRouter.post(
 
       for (const row of csvRows) {
         const baseData = {
-          RegisterNumber: getVal(row, "RegisterNumber", "Register Number", "Student Regdno", "Regd No", "RegNo", "regno"),
-          StudentName: getVal(row, "StudentName", "Student Name", "name", "Name"),
-          CourseName: getVal(row, "CourseName", "Course Name", "course", "Course"),
-          Semester: normalizeSemester(getVal(row, "Semester", "semester", "sem") || detectedSemester),
-          SubjectName: getVal(row, "SubjectName", "Subject Name", "subject", "Subject"),
-          Grade: getVal(row, "Grade", "grade", "Grade Obtained"),
+          RegisterNumber: getVal(
+            row,
+            "RegisterNumber",
+            "Register Number",
+            "Register_numbe",
+            "register_numbe",
+            "Register_number",
+            "register_number",
+            "registernumbe",
+            "registernumber",
+            "Student Regdno",
+            "student_regdno",
+            "Regd No",
+            "RegNo",
+            "regno",
+            "reg_no",
+            "htno"
+          ),
+          StudentName: getVal(row, "StudentName", "Student Name", "student_name", "studentname", "name", "Name"),
+          CourseName: getVal(row, "CourseName", "Course Name", "course_name", "coursename", "course", "Course"),
+          Semester: normalizeSemester(getVal(row, "Semester", "semester", "sem", "year", "Year", "yr") || detectedSemester),
+          SubjectName: getVal(row, "SubjectName", "Subject Name", "subject_name", "subjectname", "subject", "Subject"),
+          Grade: resolveGrade((...keys) => getVal(row, ...keys)),
           batchId: batch._id,
-          SubjectOrder: getVal(row, "SubjectOrder", "Subject Order") || null,
+          SubjectOrder: getVal(row, "SubjectOrder", "Subject Order", "order_no", "order no", "orderno", "order") || null,
           createdAt: new Date(),
         };
 
@@ -318,7 +369,14 @@ resultRouter.post(
         if (uniqueKeys.has(uniqueKey)) continue;
         uniqueKeys.add(uniqueKey);
 
-        resultsToInsert.push(baseData);
+        const meta = {};
+        for (const key in row) {
+          if (!Object.keys(baseData).includes(key)) {
+            meta[key] = row[key];
+          }
+        }
+
+        resultsToInsert.push({ ...baseData, meta });
       }
 
       if (resultsToInsert.length === 0) {
@@ -394,9 +452,10 @@ resultRouter.post(
       );
     }
 
-    const semesterCol = headers.findIndex((h) =>
-      h?.toLowerCase()?.includes("semester")
-    );
+    const semesterCol = headers.findIndex((h) => {
+      const norm = h?.toLowerCase()?.replace(/[\s_-]+/g, "") || "";
+      return norm.includes("semester") || norm === "sem" || norm === "year" || norm === "yr";
+    });
 
     let detectedSemester = null;
     if (semesterCol >= 0) {
@@ -457,7 +516,7 @@ resultRouter.post(
           ? normalizeSemester(row[semesterCol])
           : detectedSemester;
 
-      // Helper function for case-insensitive lookup
+      // Helper function for case-insensitive and normalized lookup
       const getValue = (keys) => {
         for (const key of keys) {
           // Try original case first
@@ -477,6 +536,19 @@ resultRouter.post(
           ) {
             return rowData[lowerKey];
           }
+          // Try normalized (stripping spaces, underscores, dashes)
+          const normKey = lowerKey.replace(/[\s_-]+/g, "");
+          for (const k in rowData) {
+            if (k.toLowerCase().replace(/[\s_-]+/g, "") === normKey) {
+              if (
+                rowData[k] !== undefined &&
+                rowData[k] !== null &&
+                rowData[k] !== ""
+              ) {
+                return rowData[k];
+              }
+            }
+          }
         }
         return null;
       };
@@ -487,18 +559,25 @@ resultRouter.post(
           "RegisterNumber",
           "Register Number",
           "register number",
+          "Register_numbe",
+          "register_numbe",
+          "Register_number",
+          "register_number",
+          "registernumbe",
+          "registernumber",
           "Student Regdno",
           "student regdno",
           "Student RegdNo",
           "student_regdno",
           "student-regdno",
-          "registernumber",
           "Regd No",
           "regno",
           "RegNo",
           "reg_no",
           "reg-no",
           "reg number",
+          "htno",
+          "hallticketno",
         ]),
 
         StudentName: getValue([
@@ -534,6 +613,9 @@ resultRouter.post(
             "sem_no",
             "sem-no",
             "sem no",
+            "year",
+            "Year",
+            "yr",
           ]) || detectedSemester
         ),
 
@@ -549,15 +631,7 @@ resultRouter.post(
           "Subject",
         ]),
 
-        Grade: getValue([
-          "Grade",
-          "grade",
-          "Grade Obtained",
-          "grade obtained",
-          "grade Obtained",
-          "grade_obtained",
-          "grade-obtained",
-        ]),
+        Grade: resolveGrade((...keys) => getValue(keys)),
 
         batchId: batch._id,
         SubjectOrder:
@@ -566,6 +640,12 @@ resultRouter.post(
             "subject order",
             "subjectorder",
             "Subject Order",
+            "order_no",
+            "order-no",
+            "order no",
+            "orderno",
+            "order",
+            "Order",
           ]) || null,
         createdAt: new Date(),
       };
@@ -735,7 +815,7 @@ resultRouter.post(
           headerRow.forEach((header, index) => {
             const headerText = getCellText(header)
               ?.toLowerCase()
-              .replace(/\s+/g, "");
+              .replace(/[\s_-]+/g, "");
             if (headerText) {
               headers[headerText] = index; // Array index (0-based)
             }
@@ -743,12 +823,24 @@ resultRouter.post(
 
           console.log("Detected headers from .xls:", headers);
 
+          const getColByAliases = (r, ...aliases) => {
+            for (const a of aliases) {
+              const norm = a.toLowerCase().replace(/[\s_-]+/g, "");
+              if (headers[norm] !== undefined) {
+                const val = getCellText(r[headers[norm]]);
+                if (val != null && val !== "") return val;
+              }
+            }
+            return null;
+          };
+
           // Detect semester from second row
           let detectedSemester = null;
-          if (jsonData[1] && headers["semester"] !== undefined) {
-            detectedSemester = normalizeSemester(
-              jsonData[1][headers["semester"]]
-            );
+          if (jsonData[1]) {
+            const rawSemVal = getColByAliases(jsonData[1], "semester", "sem", "year", "yr");
+            if (rawSemVal) {
+              detectedSemester = normalizeSemester(rawSemVal);
+            }
           }
 
           const finalSemester =
@@ -781,27 +873,23 @@ resultRouter.post(
               continue;
 
             const baseData = {
-              RegisterNumber:
-                headers["registernumber"] !== undefined
-                  ? getCellText(row[headers["registernumber"]])
-                  : null,
-              CourseName:
-                headers["coursename"] !== undefined
-                  ? getCellText(row[headers["coursename"]])
-                  : null,
+              RegisterNumber: getColByAliases(
+                row,
+                "registernumber",
+                "registernumbe",
+                "regno",
+                "reg_no",
+                "studentregdno",
+                "regdno",
+                "htno"
+              ),
+              CourseName: getColByAliases(row, "coursename", "course"),
               Semester:
-                headers["semester"] !== undefined
-                  ? normalizeSemester(getCellText(row[headers["semester"]])) ||
-                    finalSemester
-                  : finalSemester,
-              SubjectName:
-                headers["subjectname"] !== undefined
-                  ? getCellText(row[headers["subjectname"]])
-                  : null,
-              Grade:
-                headers["grade"] !== undefined
-                  ? getCellText(row[headers["grade"]])
-                  : null,
+                normalizeSemester(
+                  getColByAliases(row, "semester", "sem", "year", "yr")
+                ) || finalSemester,
+              SubjectName: getColByAliases(row, "subjectname", "subject"),
+              Grade: resolveGrade((...keys) => getColByAliases(row, ...keys)),
               batchId: batch._id,
               createdAt: new Date(),
             };
@@ -922,20 +1010,30 @@ resultRouter.post(
       } else {
         const headerRow = sheet.getRow(1);
         headerRow.eachCell((cell, colNumber) => {
-          const headerText = getCellText(cell)?.toLowerCase().replace(/\s+/g, "");
+          const headerText = getCellText(cell)?.toLowerCase().replace(/[\s_-]+/g, "");
           if (headerText) headers[headerText] = colNumber;
         });
       }
 
       console.log("Detected headers:", headers);
 
+      const getCellByAliases = (r, ...aliases) => {
+        for (const a of aliases) {
+          const norm = a.toLowerCase().replace(/[\s_-]+/g, "");
+          if (headers[norm]) {
+            const val = getCellText(r.getCell(headers[norm]).value);
+            if (val != null && val !== "") return val;
+          }
+        }
+        return null;
+      };
+
       // Detect semester
       const firstDataRow = sheet.getRow(startRow);
       let detectedSemester = null;
-      if (headers["semester"]) {
-        detectedSemester = normalizeSemester(
-          getCellText(firstDataRow.getCell(headers["semester"]).value)
-        );
+      const rawSemVal = getCellByAliases(firstDataRow, "semester", "sem", "year", "yr");
+      if (rawSemVal) {
+        detectedSemester = normalizeSemester(rawSemVal);
       }
 
       const finalSemester = detectedSemester || normalizeSemester(bodySemester);
@@ -970,28 +1068,27 @@ resultRouter.post(
       for (let i = startRow; i <= sheet.rowCount; i++) {
         const row = sheet.getRow(i);
 
-        // console.log(getCellText(row.getCell(headers["coursename"]).value));
         // Skip empty rows
         if (row.cellCount === 0 || row.values.every((v) => v == null)) continue;
 
         const baseData = {
-          RegisterNumber: headers["registernumber"]
-            ? getCellText(row.getCell(headers["registernumber"]).value)
-            : null,
-          CourseName: headers["coursename"]
-            ? getCellText(row.getCell(headers["coursename"]).value)
-            : null,
-          Semester: headers["semester"]
-            ? normalizeSemester(
-                getCellText(row.getCell(headers["semester"]).value)
-              ) || finalSemester
-            : finalSemester,
-          SubjectName: headers["subjectname"]
-            ? getCellText(row.getCell(headers["subjectname"]).value)
-            : null,
-          Grade: headers["grade"]
-            ? getCellText(row.getCell(headers["grade"]).value)
-            : null,
+          RegisterNumber: getCellByAliases(
+            row,
+            "registernumber",
+            "registernumbe",
+            "regno",
+            "reg_no",
+            "studentregdno",
+            "regdno",
+            "htno"
+          ),
+          CourseName: getCellByAliases(row, "coursename", "course"),
+          Semester:
+            normalizeSemester(
+              getCellByAliases(row, "semester", "sem", "year", "yr")
+            ) || finalSemester,
+          SubjectName: getCellByAliases(row, "subjectname", "subject"),
+          Grade: resolveGrade((...keys) => getCellByAliases(row, ...keys)),
           batchId: batch._id,
           createdAt: new Date(),
         };
