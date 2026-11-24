@@ -46,6 +46,25 @@ const StudentResultViewer = () => {
   const title = params.get("title") || "";
   const date = params.get("date") || "";
 
+  // Helper to safely extract component values (theory_pass, sessional_pass, practical_pass)
+  const getComponentValue = (s, ...keys) => {
+    for (const k of keys) {
+      if (s[k] !== undefined && s[k] !== null && s[k] !== "") return s[k].toString().trim();
+      if (s.meta?.[k] !== undefined && s.meta?.[k] !== null && s.meta?.[k] !== "") return s.meta[k].toString().trim();
+      const norm = k.toLowerCase().replace(/[\s_-]+/g, "");
+      if (s.meta) {
+        for (const mk in s.meta) {
+          if (mk.toLowerCase().replace(/[\s_-]+/g, "") === norm) {
+            if (s.meta[mk] !== undefined && s.meta[mk] !== null && s.meta[mk] !== "") {
+              return s.meta[mk].toString().trim();
+            }
+          }
+        }
+      }
+    }
+    return "-";
+  };
+
   // Helper function to safely get student data
   const getStudentData = (result) => {
     let data = {
@@ -70,6 +89,9 @@ const StudentResultViewer = () => {
         Grade: s.Grade,
         SubjectOrder: s.meta?.SubjectOrder ?? s.SubjectOrder,
         Marks: s.Marks || s.meta?.Marks,
+        theory_pass: getComponentValue(s, "theory_pass", "theory pass", "theorypass", "theory"),
+        sessional_pass: getComponentValue(s, "sessional_pass", "sessional pass", "sessionalpass", "sessional"),
+        practical_pass: getComponentValue(s, "practical_pass", "practical pass", "practicalpass", "practical"),
       })).sort((a, b) => (a.SubjectOrder || 0) - (b.SubjectOrder || 0));
     };
 
@@ -434,10 +456,79 @@ const StudentResultViewer = () => {
         currentStartY += 2;
       }
 
+      const is2012 =
+        /\b2012\b/i.test(title || "") ||
+        /\b2012\b/i.test(foundStudent?.batch?.title || "") ||
+        /\b2012\b/i.test(currentStudentData?.title || "") ||
+        (results || []).some(
+          (s) =>
+            s.meta?.year === "2012" ||
+            s.meta?.year === 2012 ||
+            s.year === "2012" ||
+            s.year === 2012
+        );
+
+      const hasComponentData =
+        (results || []).some(
+          (s) =>
+            (s.theory_pass && s.theory_pass !== "-") ||
+            (s.sessional_pass && s.sessional_pass !== "-") ||
+            (s.practical_pass && s.practical_pass !== "-")
+        ) ||
+        /\b(2012|2013|2014)\b/i.test(title || "") ||
+        /\b(2012|2013|2014)\b/i.test(foundStudent?.batch?.title || "") ||
+        (results || []).some(
+          (s) =>
+            ["2012", "2013", "2014"].includes(String(s.meta?.year || s.year || ""))
+        );
+
+      let headRow = ["Subject Name"];
+      if (hasComponentData) {
+        if (is2012) {
+          headRow.push("Theory", "Sessional");
+        } else {
+          headRow.push("Theory", "Sessional", "Practical");
+        }
+      } else {
+        headRow.push("Grade");
+      }
+
+      const tableHead = [headRow];
+
+      const tableBody = results.map((s) => {
+        const row = [capitalize(s.SubjectName)];
+        if (hasComponentData) {
+          row.push(s.theory_pass || "-");
+          row.push(s.sessional_pass || "-");
+          if (!is2012) {
+            row.push(s.practical_pass || "-");
+          }
+        } else {
+          row.push((s.Grade || "").toUpperCase());
+        }
+        return row;
+      });
+
+      const colCount = headRow.length;
+      const columnStyles = {
+        0: {
+          cellWidth: colCount === 4 ? 75 : colCount === 3 ? 90 : 120,
+          fontStyle: "bold",
+          halign: "left",
+        },
+      };
+      for (let c = 1; c < colCount; c++) {
+        columnStyles[c] = {
+          cellWidth: colCount === 4 ? 30 : colCount === 3 ? 35 : 30,
+          halign: "center",
+          fontStyle: "bold",
+        };
+      }
+
       autoTable(pdf, {
         startY: currentStartY,
-        head: [["Subject Name", "Grade"]],
-        body: results.map(s => [capitalize(s.SubjectName), s.Grade.toUpperCase()]),
+        head: tableHead,
+        body: tableBody,
         margin: { left: marginX, right: marginX },
         styles: {
           fontSize: 9,
@@ -454,10 +545,7 @@ const StudentResultViewer = () => {
           halign: "left",
           fontSize: 9,
         },
-        columnStyles: {
-          0: { cellWidth: 120, fontStyle: "bold", halign: "left" },
-          1: { cellWidth: 30, halign: "left", fontStyle: "bold" },
-        },
+        columnStyles,
         alternateRowStyles: { fillColor: [248, 250, 249] },
         theme: "grid",
       });
@@ -879,45 +967,139 @@ const StudentResultViewer = () => {
 
               {/* Helper to render a results table */}
               {(() => {
-                const renderResultsTable = (results, title, colorClass, date) => (
-                  <div className="mb-8 last:mb-0">
-                    <div className="flex justify-between items-center mb-3">
-                      <h4 className={`text-lg font-semibold ${colorClass}`}>
-                        {title}
-                      </h4>
-                      {date && (
-                        <p className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
-                          Published: {formatDate(date)}
-                        </p>
-                      )}
-                    </div>
-                    <div className="overflow-x-auto border border-gray-200 shadow-sm">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-[#21605A]">
-                          <tr>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Subject</th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider w-24">Grade</th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-100">
-                          {results.map((subject, index) => (
-                            <tr key={index} className="hover:bg-gray-50 transition-colors">
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {subject.SubjectName}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm w-24">
-                                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${subject.Grade?.toUpperCase() === "F" || subject.Grade?.toUpperCase() === "FAIL" ? "bg-red-100 text-red-700" : "bg-blue-50 text-blue-700"
-                                  }`}>
-                                  {toTitleCase(subject.Grade)}
-                                </span>
-                              </td>
+                const renderResultsTable = (results, title, colorClass, date) => {
+                  const is2012 =
+                    /\b2012\b/i.test(title || "") ||
+                    /\b2012\b/i.test(foundStudent?.batch?.title || "") ||
+                    /\b2012\b/i.test(currentStudentInfo?.title || "") ||
+                    (results || []).some(
+                      (s) =>
+                        s.meta?.year === "2012" ||
+                        s.meta?.year === 2012 ||
+                        s.year === "2012" ||
+                        s.year === 2012
+                    );
+
+                  const hasComponentData =
+                    (results || []).some(
+                      (s) =>
+                        (s.theory_pass && s.theory_pass !== "-") ||
+                        (s.sessional_pass && s.sessional_pass !== "-") ||
+                        (s.practical_pass && s.practical_pass !== "-")
+                    ) ||
+                    /\b(2012|2013|2014)\b/i.test(title || "") ||
+                    /\b(2012|2013|2014)\b/i.test(foundStudent?.batch?.title || "") ||
+                    (results || []).some(
+                      (s) =>
+                        ["2012", "2013", "2014"].includes(String(s.meta?.year || s.year || ""))
+                    );
+
+                  const showTheory = hasComponentData;
+                  const showSessional = hasComponentData;
+                  const showPractical = hasComponentData && !is2012;
+                  const showGrade = !hasComponentData;
+
+                  const renderBadge = (val) => {
+                    if (!val || val === "-" || val.toString().trim() === "") {
+                      return <span className="text-gray-400 font-bold text-base">-</span>;
+                    }
+                    const upper = val.toString().trim().toUpperCase();
+                    if (upper === "FAIL" || upper === "F") {
+                      return (
+                        <span className="px-2.5 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-red-100 text-red-700">
+                          {toTitleCase(val)}
+                        </span>
+                      );
+                    }
+                    if (upper === "PASS" || upper === "P") {
+                      return (
+                        <span className="px-2.5 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-blue-50 text-blue-700">
+                          {toTitleCase(val)}
+                        </span>
+                      );
+                    }
+                    return (
+                      <span className="px-2.5 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-gray-100 text-gray-800">
+                        {toTitleCase(val)}
+                      </span>
+                    );
+                  };
+
+                  return (
+                    <div className="mb-8 last:mb-0">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className={`text-lg font-semibold ${colorClass}`}>
+                          {title}
+                        </h4>
+                        {date && (
+                          <p className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
+                            Published: {formatDate(date)}
+                          </p>
+                        )}
+                      </div>
+                      <div className="overflow-x-auto border border-gray-200 shadow-sm rounded">
+                        <table className="min-w-full divide-y divide-gray-200 text-left">
+                          <thead className="bg-[#21605A] text-white">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+                                Subject
+                              </th>
+                              {showTheory && (
+                                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider w-28">
+                                  Theory
+                                </th>
+                              )}
+                              {showSessional && (
+                                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider w-28">
+                                  Sessional
+                                </th>
+                              )}
+                              {showPractical && (
+                                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider w-28">
+                                  Practical
+                                </th>
+                              )}
+                              {showGrade && (
+                                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider w-24">
+                                  Grade
+                                </th>
+                              )}
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-100">
+                            {results.map((subject, index) => (
+                              <tr key={index} className="hover:bg-gray-50 transition-colors">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                  {subject.SubjectName}
+                                </td>
+                                {showTheory && (
+                                  <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
+                                    {renderBadge(subject.theory_pass)}
+                                  </td>
+                                )}
+                                {showSessional && (
+                                  <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
+                                    {renderBadge(subject.sessional_pass)}
+                                  </td>
+                                )}
+                                {showPractical && (
+                                  <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
+                                    {renderBadge(subject.practical_pass)}
+                                  </td>
+                                )}
+                                {showGrade && (
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm w-24 text-left">
+                                    {renderBadge(subject.Grade)}
+                                  </td>
+                                )}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                  </div>
-                );
+                  );
+                };
 
                 return (
                   <>
@@ -1040,53 +1222,76 @@ const StudentResultViewer = () => {
                                 });
                               }
 
-                              return subjects?.map((subject, subIndex) => (
-                                <div
-                                  key={subIndex}
-                                  className="flex justify-between items-center p-3 bg-white rounded border border-gray-100"
-                                >
-                                  <div>
-                                    <p className="font-medium">
-                                      {capitalize(subject.SubjectName) || "N/A"}
-                                    </p>
-                                  </div>
-                                  <div className="flex items-center space-x-4">
-                                    <div>
-                                      <p className="text-sm text-gray-500">Grade</p>
-                                      <span
-                                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${subject.Grade === "A+"
-                                          ? "bg-green-100 text-green-800"
-                                          : subject.Grade === "F" || subject.Grade?.toUpperCase() === "FAIL"
-                                            ? "bg-red-100 text-red-800"
-                                            : "bg-blue-100 text-blue-800"
-                                          }`}
-                                      >
-                                        {toTitleCase(subject.Grade) || "N/A"}
-                                      </span>
-                                    </div>
-                                    {/* <div>
-                                  <p className="text-sm text-gray-500">Type</p>
-                                  <span
-                                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                      result.batch.type === "rv"
-                                        ? "bg-purple-100 text-purple-800"
-                                        : result.batch.type ===
-                                            "regularAndBacklog"
-                                          ? "bg-yellow-100 text-yellow-800"
-                                          : "bg-gray-100 text-gray-800"
-                                    }`}
+                              const isHist2012 =
+                                /\b2012\b/i.test(result.batch?.title || "") ||
+                                (subjects || []).some(
+                                  (s) =>
+                                    s.meta?.year === "2012" ||
+                                    s.meta?.year === 2012 ||
+                                    s.year === "2012" ||
+                                    s.year === 2012
+                                );
+
+                              return subjects?.map((subject, subIndex) => {
+                                const th = getComponentValue(subject, "theory_pass", "theory pass", "theorypass", "theory");
+                                const se = getComponentValue(subject, "sessional_pass", "sessional pass", "sessionalpass", "sessional");
+                                const pr = getComponentValue(subject, "practical_pass", "practical pass", "practicalpass", "practical");
+                                const hasComps = th !== "-" || se !== "-" || pr !== "-";
+
+                                return (
+                                  <div
+                                    key={subIndex}
+                                    className="flex justify-between items-center p-3 bg-white rounded border border-gray-100"
                                   >
-                                    {result.batch.type === "rv"
-                                      ? "Revaluation"
-                                      : result.batch.type ===
-                                          "regularAndBacklog"
-                                        ? "Regular & Backlog"
-                                        : "Regular"}
-                                  </span>
-                                </div> */}
+                                    <div>
+                                      <p className="font-medium">
+                                        {capitalize(subject.SubjectName) || "N/A"}
+                                      </p>
+                                    </div>
+                                    <div className="flex items-center space-x-4">
+                                      {hasComps && (
+                                        <div className="hidden sm:flex items-center space-x-3 text-xs text-gray-600">
+                                          <span>
+                                            Theory:{" "}
+                                            <strong className={th.toUpperCase() === "FAIL" ? "text-red-600" : th.toUpperCase() === "PASS" ? "text-blue-600" : "text-gray-400"}>
+                                              {th}
+                                            </strong>
+                                          </span>
+                                          <span>
+                                            Sessional:{" "}
+                                            <strong className={se.toUpperCase() === "FAIL" ? "text-red-600" : se.toUpperCase() === "PASS" ? "text-blue-600" : "text-gray-400"}>
+                                              {se}
+                                            </strong>
+                                          </span>
+                                          {!isHist2012 && (
+                                            <span>
+                                              Practical:{" "}
+                                              <strong className={pr.toUpperCase() === "FAIL" ? "text-red-600" : pr.toUpperCase() === "PASS" ? "text-blue-600" : "text-gray-400"}>
+                                                {pr}
+                                              </strong>
+                                            </span>
+                                          )}
+                                        </div>
+                                      )}
+                                      {!hasComps && (
+                                        <div>
+                                          <p className="text-sm text-gray-500">Grade</p>
+                                          <span
+                                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${subject.Grade === "A+"
+                                              ? "bg-green-100 text-green-800"
+                                              : subject.Grade === "F" || subject.Grade?.toUpperCase() === "FAIL"
+                                                ? "bg-red-100 text-red-800"
+                                                : "bg-blue-100 text-blue-800"
+                                              }`}
+                                          >
+                                            {toTitleCase(subject.Grade) || "N/A"}
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              ));
+                                );
+                              });
                             })()}
                           </div>
                         </div>
