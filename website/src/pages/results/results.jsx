@@ -457,15 +457,15 @@ const StudentResultViewer = () => {
       }
 
       const is2012 =
-        /\b2012\b/i.test(title || "") ||
-        /\b2012\b/i.test(foundStudent?.batch?.title || "") ||
-        /\b2012\b/i.test(currentStudentData?.title || "") ||
+        /2012/i.test(title || "") ||
+        /2012/i.test(foundStudent?.batch?.title || "") ||
+        /2012/i.test(currentStudentData?.title || "") ||
+        /^12\d{6,}/.test(String(currentStudentData?.RegisterNumber || results?.[0]?.RegisterNumber || "")) ||
         (results || []).some(
           (s) =>
-            s.meta?.year === "2012" ||
-            s.meta?.year === 2012 ||
-            s.year === "2012" ||
-            s.year === 2012
+            String(s.meta?.year || s.year || "").includes("2012") ||
+            String(s.meta?.year || s.year || "") === "12" ||
+            /^12\d{6,}/.test(String(s.RegisterNumber || ""))
         );
 
       const hasComponentData =
@@ -475,11 +475,12 @@ const StudentResultViewer = () => {
             (s.sessional_pass && s.sessional_pass !== "-") ||
             (s.practical_pass && s.practical_pass !== "-")
         ) ||
-        /\b(2012|2013|2014)\b/i.test(title || "") ||
-        /\b(2012|2013|2014)\b/i.test(foundStudent?.batch?.title || "") ||
+        /2012|2013|2014/i.test(title || "") ||
+        /2012|2013|2014/i.test(foundStudent?.batch?.title || "") ||
         (results || []).some(
           (s) =>
-            ["2012", "2013", "2014"].includes(String(s.meta?.year || s.year || ""))
+            ["2012", "2013", "2014"].some(y => String(s.meta?.year || s.year || "").includes(y)) ||
+            /^(12|13|14)\d{6,}/.test(String(s.RegisterNumber || ""))
         );
 
       let headRow = ["Subject Name"];
@@ -969,15 +970,15 @@ const StudentResultViewer = () => {
               {(() => {
                 const renderResultsTable = (results, title, colorClass, date) => {
                   const is2012 =
-                    /\b2012\b/i.test(title || "") ||
-                    /\b2012\b/i.test(foundStudent?.batch?.title || "") ||
-                    /\b2012\b/i.test(currentStudentInfo?.title || "") ||
+                    /2012/i.test(title || "") ||
+                    /2012/i.test(foundStudent?.batch?.title || "") ||
+                    /2012/i.test(currentStudentInfo?.title || "") ||
+                    /^12\d{6,}/.test(String(currentStudentInfo?.RegisterNumber || results?.[0]?.RegisterNumber || "")) ||
                     (results || []).some(
                       (s) =>
-                        s.meta?.year === "2012" ||
-                        s.meta?.year === 2012 ||
-                        s.year === "2012" ||
-                        s.year === 2012
+                        String(s.meta?.year || s.year || "").includes("2012") ||
+                        String(s.meta?.year || s.year || "") === "12" ||
+                        /^12\d{6,}/.test(String(s.RegisterNumber || ""))
                     );
 
                   const hasComponentData =
@@ -987,11 +988,12 @@ const StudentResultViewer = () => {
                         (s.sessional_pass && s.sessional_pass !== "-") ||
                         (s.practical_pass && s.practical_pass !== "-")
                     ) ||
-                    /\b(2012|2013|2014)\b/i.test(title || "") ||
-                    /\b(2012|2013|2014)\b/i.test(foundStudent?.batch?.title || "") ||
+                    /2012|2013|2014/i.test(title || "") ||
+                    /2012|2013|2014/i.test(foundStudent?.batch?.title || "") ||
                     (results || []).some(
                       (s) =>
-                        ["2012", "2013", "2014"].includes(String(s.meta?.year || s.year || ""))
+                        ["2012", "2013", "2014"].some(y => String(s.meta?.year || s.year || "").includes(y)) ||
+                        /^(12|13|14)\d{6,}/.test(String(s.RegisterNumber || ""))
                     );
 
                   const showTheory = hasComponentData;
@@ -1223,13 +1225,13 @@ const StudentResultViewer = () => {
                               }
 
                               const isHist2012 =
-                                /\b2012\b/i.test(result.batch?.title || "") ||
+                                /2012/i.test(result.batch?.title || "") ||
+                                /^12\d{6,}/.test(String(rNum || subjects?.[0]?.RegisterNumber || "")) ||
                                 (subjects || []).some(
                                   (s) =>
-                                    s.meta?.year === "2012" ||
-                                    s.meta?.year === 2012 ||
-                                    s.year === "2012" ||
-                                    s.year === 2012
+                                    String(s.meta?.year || s.year || "").includes("2012") ||
+                                    String(s.meta?.year || s.year || "") === "12" ||
+                                    /^12\d{6,}/.test(String(s.RegisterNumber || ""))
                                 );
 
                               return subjects?.map((subject, subIndex) => {
