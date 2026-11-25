@@ -114,6 +114,19 @@ const StudentResultViewer = () => {
       data.Semester = recordWithName.Semester || allRecords[0].Semester || result.batch?.semester || "N/A";
     }
 
+    const regNoStr = String(data.RegisterNumber || "");
+    const batchTitleStr = String(result.batch?.title || data.regularTitle || data.rabTitle || data.rvTitle || "");
+    data.isYearWise =
+      /2012|2013|2014/i.test(batchTitleStr) ||
+      /\b(I|II|III|IV)\s+Year\b/i.test(batchTitleStr) ||
+      /\bYear\s+Examinations\b/i.test(batchTitleStr) ||
+      /^1[234]\d{6,}/.test(regNoStr) ||
+      allRecords.some(
+        (s) =>
+          ["2012", "2013", "2014"].some((y) => String(s.meta?.year || s.year || "").includes(y)) ||
+          /^1[234]\d{6,}/.test(String(s.RegisterNumber || ""))
+      );
+
     // Group results and sort by publication date descending (latest on top)
     data.resultGroups = [
       { results: data.regularResults, title: data.regularTitle, color: "text-gray-900", date: data.regularResults[0]?.batchId?.resultDate },
@@ -378,7 +391,8 @@ const StudentResultViewer = () => {
         : (currentStudentData.CourseName || "N/A").toUpperCase();
     currentY = addInfoLine("Course", courseName, currentY);
 
-    currentY = addInfoLine("Semester", currentStudentData.Semester, currentY);
+    const termLabel = currentStudentData.isYearWise ? "Year" : "Semester";
+    currentY = addInfoLine(termLabel, currentStudentData.Semester, currentY);
 
     // --- ACADEMIC PERFORMANCE SECTION ---
     let performanceStartY = currentY + 5;
@@ -401,11 +415,11 @@ const StudentResultViewer = () => {
 
     performanceStartY += rectHeight + 2;
 
-    // --- SEMESTER & PUBLISHED DATE ---
+    // --- SEMESTER / YEAR & PUBLISHED DATE ---
     pdf.setFontSize(10);
     pdf.setFont("helvetica", "bold");
     pdf.setTextColor(33, 96, 90); // University Green
-    pdf.text(`Semester: ${currentStudentData.Semester}`, marginX, performanceStartY + 4);
+    pdf.text(`${termLabel}: ${currentStudentData.Semester}`, marginX, performanceStartY + 4);
 
     const currPublishDate = foundStudent.batch?.resultDate ? formatDate(foundStudent.batch.resultDate) : "N/A";
 
@@ -429,12 +443,12 @@ const StudentResultViewer = () => {
         pdf.text(title.toUpperCase(), marginX, startY + 5);
         currentStartY += 6;
 
-        // Semester (if provided)
+        // Semester / Year (if provided)
         if (semester) {
           pdf.setFontSize(10);
           pdf.setFont("helvetica", "bold");
           pdf.setTextColor(33, 96, 90); // University Green
-          pdf.text(`Semester: ${semester}`, marginX, currentStartY + 4);
+          pdf.text(`${termLabel}: ${semester}`, marginX, currentStartY + 4);
 
           if (date) {
             pdf.setFontSize(9);
@@ -615,7 +629,8 @@ const StudentResultViewer = () => {
           pdf.setFont("helvetica", "bold");
           pdf.setTextColor(33, 96, 90); // University Green
           const semNumVal = batchItem.batch?.semester || studentData.Semester;
-          pdf.text(`Semester: ${semNumVal}`, marginX, currentY + 4);
+          const histTermLabel = studentData.isYearWise ? "Year" : "Semester";
+          pdf.text(`${histTermLabel}: ${semNumVal}`, marginX, currentY + 4);
 
           pdf.setFontSize(9);
           pdf.setFont("helvetica", "normal");
@@ -935,7 +950,9 @@ const StudentResultViewer = () => {
                 </div>
 
                 <div className="bg-gray-50 p-3 rounded">
-                  <p className="text-sm text-gray-500">Semester</p>
+                  <p className="text-sm text-gray-500">
+                    {currentStudentInfo.isYearWise ? "Year" : "Semester"}
+                  </p>
                   <p className="font-medium text-lg">
                     {currentStudentInfo.Semester}
                   </p>
@@ -963,7 +980,7 @@ const StudentResultViewer = () => {
 
             <div className="mb-8">
               <h3 className="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b">
-                Current Semester
+                {currentStudentInfo.isYearWise ? "Current Year" : "Current Semester"}
               </h3>
 
               {/* Helper to render a results table */}
@@ -1152,10 +1169,15 @@ const StudentResultViewer = () => {
                       ];
                       const sName = allBatchRecords.find((r) => r.StudentName)?.StudentName || "N/A";
                       const rNum = allBatchRecords.find((r) => r.RegisterNumber)?.RegisterNumber || "N/A";
+                      const isBatchYearWise =
+                        /2012|2013|2014/i.test(result.batch?.title || "") ||
+                        /\b(I|II|III|IV)\s+Year\b/i.test(result.batch?.title || "") ||
+                        /^1[234]\d{6,}/.test(String(rNum || ""));
+                      const batchTermLabel = isBatchYearWise ? "Year" : "Semester";
                       const semDisplay = result.batch?.semester
-                        ? `Semester ${result.batch.semester}`
+                        ? `${batchTermLabel} ${result.batch.semester}`
                         : allBatchRecords[0]?.Semester
-                          ? `Semester ${allBatchRecords[0].Semester}`
+                          ? `${batchTermLabel} ${allBatchRecords[0].Semester}`
                           : "";
 
                       return (
